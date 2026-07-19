@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Articles — Hands & Head</title>
+<meta name="description" content="Field notes on RMG sourcing, systems architecture, and digital infrastructure for Bangladesh's export industry.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#0d0d0f;
+    --ink-2:#161619;
+    --denim:#1c2b3a;
+    --denim-2:#26384b;
+    --leather:#4a3222;
+    --red:#c81e2c;
+    --paper:#ede7dc;
+    --paper-dim:#a9a297;
+    --line: rgba(237,231,220,0.14);
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .mono{
+    font-family:'JetBrains Mono', monospace;
+    letter-spacing:0.02em;
+  }
+
+  .display{
+    font-family:'Oswald', sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.01em;
+  }
+
+  /* ===== texture layer ===== */
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:5;
+    opacity:0.05; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ===== top bar ===== */
+  header{
+    position:sticky; top:0; z-index:10;
+    background:rgba(13,13,15,0.92);
+    backdrop-filter: blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar{
+    max-width:1180px; margin:0 auto;
+    padding:18px 24px;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:16px;
+  }
+  .brand{
+    display:flex; align-items:baseline; gap:10px;
+  }
+  .brand .h{
+    font-family:'Oswald', sans-serif; font-weight:700;
+    font-size:1.05rem; letter-spacing:0.03em;
+    text-transform:uppercase;
+  }
+  .brand .h span{ color:var(--red); }
+  .brand .sub{
+    font-size:0.68rem; color:var(--paper-dim);
+    letter-spacing:0.14em; text-transform:uppercase;
+  }
+  .topbar a.home-link{
+    color:var(--paper-dim); text-decoration:none;
+    font-size:0.78rem; letter-spacing:0.06em;
+    border:1px solid var(--line); padding:7px 14px;
+    transition:border-color .2s, color .2s;
+  }
+  .topbar a.home-link:hover{ border-color:var(--red); color:var(--paper); }
+
+  /* ===== masthead / hero ===== */
+  .masthead{
+    max-width:1180px; margin:0 auto;
+    padding:64px 24px 48px;
+    border-bottom:1px solid var(--line);
+    position:relative;
+  }
+  .masthead .eyebrow{
+    display:flex; align-items:center; gap:10px;
+    font-size:0.72rem; color:var(--red);
+    letter-spacing:0.18em; text-transform:uppercase;
+    margin-bottom:22px;
+  }
+  .masthead .eyebrow::before{
+    content:''; width:22px; height:1px; background:var(--red);
+  }
+  .masthead h1{
+    font-size:clamp(2.6rem, 7vw, 5rem);
+    line-height:0.96;
+    font-weight:700;
+    max-width:14ch;
+  }
+  .masthead h1 em{
+    font-style:normal; color:var(--red);
+  }
+  .masthead .dek{
+    margin-top:22px;
+    max-width:52ch;
+    color:var(--paper-dim);
+    font-size:1.02rem;
+    line-height:1.65;
+  }
+  .masthead .meta-strip{
+    margin-top:38px;
+    display:flex; flex-wrap:wrap; gap:28px;
+    font-size:0.74rem; color:var(--paper-dim);
+    letter-spacing:0.04em;
+  }
+  .masthead .meta-strip b{ color:var(--paper); font-weight:600;}
+
+  /* ===== registry bar ===== */
+  .registry{
+    max-width:1180px; margin:0 auto;
+    padding:20px 24px;
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:12px;
+    border-bottom:1px solid var(--line);
+  }
+  .registry .count{
+    font-size:0.76rem; color:var(--paper-dim); letter-spacing:0.06em;
+  }
+  .registry .count b{ color:var(--paper); }
+  .filter-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .filter-btn{
+    background:transparent; color:var(--paper-dim);
+    border:1px solid var(--line);
+    padding:7px 13px; font-size:0.7rem; letter-spacing:0.06em;
+    text-transform:uppercase; cursor:pointer;
+    font-family:'JetBrains Mono', monospace;
+    transition:all .18s;
+  }
+  .filter-btn:hover{ color:var(--paper); border-color:var(--paper-dim); }
+  .filter-btn.active{
+    color:var(--ink); background:var(--paper); border-color:var(--paper);
+  }
+
+  /* ===== article grid ===== */
+  .grid-wrap{ max-width:1180px; margin:0 auto; padding:48px 24px 100px; }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  @media (max-width:860px){ .grid{ grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:600px){ .grid{ grid-template-columns:1fr;} }
+
+  .card{
+    background:var(--ink);
+    padding:28px 24px 24px;
+    display:flex; flex-direction:column;
+    min-height:290px;
+    text-decoration:none; color:inherit;
+    position:relative;
+    overflow:hidden;
+    transition:background .25s;
+  }
+  .card:hover{ background:var(--ink-2); }
+  .card:hover .card-title{ color:var(--red); }
+  .card:hover .stamp{ opacity:1; transform:rotate(-8deg) scale(1); }
+
+  .card-top{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    margin-bottom:20px;
+  }
+  .file-id{
+    font-size:0.68rem; color:var(--paper-dim);
+    letter-spacing:0.05em;
+  }
+  .tag{
+    font-size:0.62rem; letter-spacing:0.08em; text-transform:uppercase;
+    padding:3px 8px; border:1px solid var(--denim-2);
+    color:var(--paper-dim);
+  }
+
+  .card-title{
+    font-family:'Oswald', sans-serif;
+    font-weight:600; font-size:1.28rem; line-height:1.2;
+    text-transform:none;
+    letter-spacing:0;
+    margin-bottom:12px;
+    transition:color .2s;
+  }
+  .card-excerpt{
+    font-size:0.86rem; color:var(--paper-dim);
+    line-height:1.6;
+    flex:1;
+  }
+  .card-bottom{
+    margin-top:20px; padding-top:14px;
+    border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:0.68rem; color:var(--paper-dim);
+    letter-spacing:0.05em;
+  }
+  .card-bottom .arrow{ font-size:0.9rem; transition:transform .2s;}
+  .card:hover .arrow{ transform:translateX(4px); color:var(--red); }
+
+  .stamp{
+    position:absolute; top:20px; right:-6px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.6rem; letter-spacing:0.12em;
+    color:var(--red); border:1.5px solid var(--red);
+    padding:3px 9px;
+    opacity:0; transform:rotate(-8deg) scale(1.15);
+    transition:all .3s;
+    pointer-events:none;
+  }
+
+  /* featured (first) card spans wider */
+  .card.featured{
+    grid-column:span 2;
+  }
+  @media (max-width:860px){ .card.featured{ grid-column:span 2; } }
+  @media (max-width:600px){ .card.featured{ grid-column:span 1; } }
+  .card.featured .card-title{ font-size:1.7rem; }
+
+  /* ===== empty state ===== */
+  .empty{
+    grid-column:1 / -1;
+    padding:70px 20px; text-align:center;
+    color:var(--paper-dim); background:var(--ink);
+  }
+  .empty .display{ color:var(--paper); font-size:1.4rem; margin-bottom:10px;}
+
+  /* ===== footer ===== */
+  footer{
+    border-top:1px solid var(--line);
+    padding:34px 24px;
+  }
+  .footer-inner{
+    max-width:1180px; margin:0 auto;
+    display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:14px;
+    font-size:0.7rem; color:var(--paper-dim); letter-spacing:0.04em;
+  }
+  footer a{ color:var(--paper-dim); }
+  footer a:hover{ color:var(--red); }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <span class="h">HANDS <span>&</span> HEAD</span>
+      <span class="sub mono">/ ARTICLES</span>
+    </div>
+    <a class="home-link mono" href="https://handsandhead.com">← handsandhead.com</a>
+  </div>
+</header>
+
+<section class="masthead">
+  <div class="eyebrow mono">FIELD RECORD · SOURCING & SYSTEMS</div>
+  <h1 class="display">Notes from the <em>build.</em></h1>
+  <p class="dek">
+    Writing on RMG and leather sourcing, headless B2B architecture, and the
+    infrastructure Bangladesh's export industry has never had. Filed as I
+    build it, not after.
+  </p>
+  <div class="meta-strip mono">
+    <span><b id="stat-count">0</b> Articles Filed</span>
+    <span>Author — <b>Rakib Himon</b></span>
+    <span>Since <b>2026</b></span>
+  </div>
+</section>
+
+<section class="registry">
+  <div class="count mono">Showing <b id="visible-count">0</b> of <b id="total-count">0</b></div>
+  <div class="filter-row" id="filter-row"></div>
+</section>
+
+<section class="grid-wrap">
+  <div class="grid" id="article-grid"></div>
+</section>
+
+<footer>
+  <div class="footer-inner mono">
+    <span>© 2026 HANDS & HEAD — RMG & Leather Sourcing, Dhaka</span>
+    <span><a href="https://handsandhead.com">handsandhead.com</a> · <a href="https://www.linkedin.com/in/shaikh-rakibuzzaman-himon-5a0aa47" target="_blank" rel="noopener">LinkedIn</a></span>
+  </div>
+</footer>
+
+<script>
+/* =========================================================
+   ARTICLE DATA
+   Add a new article by adding one object to this array.
+   Everything else on the page updates automatically —
+   the grid, the tag filters, and the article count.
+
+   Fields:
+   id       - unique short code, shown as the file number
+   title    - article headline
+   excerpt  - 1-2 sentence summary
+   tag      - one category word (used for filtering)
+   date     - "YYYY-MM-DD" (used for sort + display)
+   url      - link to the full article (can be external,
+              e.g. a LinkedIn article URL, or a local page
+              like "articles/my-post.html")
+   featured - true/false — true makes the card span wider
+========================================================= */
+const ARTICLES = [
+  {
+    id: "RX-001",
+    title: "Bangladesh's Sourcing Infrastructure Gap",
+    excerpt: "The world's 2nd largest RMG exporter still runs on email threads and PDF catalogs. Here's what that costs, and what replaces it.",
+    tag: "Sourcing",
+    date: "2026-07-19",
+    url: "https://www.linkedin.com/in/shaikh-rakibuzzaman-himon-5a0aa47",
+    featured: true
+  },
+  {
+    id: "RX-002",
+    title: "Building RAWx: A Headless B2B Terminal, Phone-First",
+    excerpt: "How a full seller OS got built on Android with Spck Editor — no laptop required.",
+    tag: "Systems",
+    date: "2026-07-18",
+    url: "#",
+    featured: false
+  },
+  {
+    id: "RX-003",
+    title: "Character Consistency in AI Visual Production",
+    excerpt: "A year of iteration on multi-angle prompt structure — the methodology behind RAWx's visual pipeline.",
+    tag: "AI Production",
+    date: "2026-07-15",
+    url: "#",
+    featured: false
+  }
+];
+
+/* =========================================================
+   RENDER LOGIC — no need to edit below this line
+========================================================= */
+const grid = document.getElementById('article-grid');
+const filterRow = document.getElementById('filter-row');
+const visibleCountEl = document.getElementById('visible-count');
+const totalCountEl = document.getElementById('total-count');
+const statCountEl = document.getElementById('stat-count');
+
+let activeTag = 'All';
+
+function formatDate(iso){
+  const d = new Date(iso + 'T00:00:00');
+  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  return `${months[d.getMonth()]} ${String(d.getDate()).padStart(2,'0')}, ${d.getFullYear()}`;
+}
+
+function buildFilters(){
+  const tags = ['All', ...new Set(ARTICLES.map(a => a.tag))];
+  filterRow.innerHTML = tags.map(t =>
+    `<button class="filter-btn ${t===activeTag?'active':''}" data-tag="${t}">${t}</button>`
+  ).join('');
+  filterRow.querySelectorAll('.filter-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      activeTag = btn.dataset.tag;
+      buildFilters();
+      renderGrid();
+    });
+  });
+}
+
+function renderGrid(){
+  const sorted = [...ARTICLES].sort((a,b)=> new Date(b.date) - new Date(a.date));
+  const filtered = activeTag === 'All' ? sorted : sorted.filter(a => a.tag === activeTag);
+
+  totalCountEl.textContent = ARTICLES.length;
+  visibleCountEl.textContent = filtered.length;
+  statCountEl.textContent = ARTICLES.length;
+
+  if(filtered.length === 0){
+    grid.innerHTML = `<div class="empty"><div class="display">Nothing filed under this tag yet.</div>Check back — new entries go up as they're written.</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((a, i) => `
+    <a class="card ${a.featured ? 'featured' : ''}" href="${a.url}" target="${a.url.startsWith('http') ? '_blank' : '_self'}" rel="noopener">
+      <span class="stamp mono">FILED</span>
+      <div class="card-top">
+        <span class="file-id mono">${a.id}</span>
+        <span class="tag">${a.tag}</span>
+      </div>
+      <div class="card-title">${a.title}</div>
+      <div class="card-excerpt">${a.excerpt}</div>
+      <div class="card-bottom">
+        <span class="mono">${formatDate(a.date)}</span>
+        <span class="arrow">→</span>
+      </div>
+    </a>
+  `).join('');
+}
+
+buildFilters();
+renderGrid();
+</script>
+
+</body>
+</html>
